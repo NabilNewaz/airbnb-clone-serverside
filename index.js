@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const dayjs = require('dayjs');
 require('dotenv').config();
 
 app.use(cors());
@@ -14,12 +15,35 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const categoriesCollection = client.db('airbnbClone').collection('categories');
+        const cardCollection = client.db('airbnbClone').collection('cardData');
 
         app.get('/get-categories', async (req, res) => {
             const query = {};
             const cursor = categoriesCollection.find(query);
             const categories = await cursor.toArray();
             res.send(categories);
+        })
+
+        app.get('/get-card/:category_id', async (req, res) => {
+            const query = { category_id: req.params.category_id };
+            const cursor = cardCollection.find(query);
+            const cards = await cursor.toArray();
+            res.send(cards);
+        })
+
+        app.post('/search', async (req, res) => {
+            const check_in = new RegExp(dayjs(req.body.check_in).format("MMM D"));
+            const address = new RegExp(req.body.address)
+            const query = {
+                $or: [
+                    { address: { $regex: address, $options: 'i' } },
+                    { date_range: { $regex: /Sep 8/, $options: 'i' } }
+                ]
+            };
+
+            const cursor = cardCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
         })
 
     } finally {
