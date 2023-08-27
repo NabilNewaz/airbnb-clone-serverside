@@ -44,6 +44,7 @@ async function run() {
             const query = {
                 $or: [
                     { address: { $regex: address, $options: 'i' } },
+                    { title: { $regex: address, $options: 'i' } },
                     { date_range: { $regex: check_in, $options: 'i' } }
                 ]
             };
