@@ -24,6 +24,13 @@ async function run() {
             res.send(categories);
         })
 
+        app.get('/get-all-cards', async (req, res) => {
+            const query = {};
+            const cursor = cardCollection.find(query);
+            const categories = await cursor.toArray();
+            res.send(categories);
+        })
+
         app.get('/get-card/:category_id', async (req, res) => {
             const query = { category_id: req.params.category_id };
             const cursor = cardCollection.find(query);
@@ -37,7 +44,21 @@ async function run() {
             const query = {
                 $or: [
                     { address: { $regex: address, $options: 'i' } },
-                    { date_range: { $regex: /Sep 8/, $options: 'i' } }
+                    { date_range: { $regex: check_in, $options: 'i' } }
+                ]
+            };
+
+            const cursor = cardCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
+        app.post('/filter', async (req, res) => {
+            const query = {
+                $or: [
+                    { type_of: req.body?.type },
+                    { property_type: req.body?.propertyType },
+                    { price: { $gte: req.body?.range[0].toString(), $lte: req.body?.range[1].toString() } }
                 ]
             };
 
