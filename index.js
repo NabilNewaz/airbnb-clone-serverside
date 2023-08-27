@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const dayjs = require('dayjs');
 require('dotenv').config();
 
@@ -58,10 +58,13 @@ async function run() {
                 $or: [
                     { type_of: req.body?.type },
                     { property_type: req.body?.propertyType },
-                    { price: { $gte: req.body?.range[0].toString(), $lte: req.body?.range[1].toString() } }
+                    { price: { $gte: req.body?.range[0].toString(), $lte: req.body?.range[1].toString() } },
+                    { type_of: req.body?.propertyType },
+                    { bed_room: `${req.body?.bedroom}` },
+                    { beds: `${req.body?.bed}` },
+                    { barthroom: `${req.body?.bathroom}` }
                 ]
             };
-
             const cursor = cardCollection.find(query);
             const result = await cursor.toArray();
             res.send(result)
